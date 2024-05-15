@@ -17,9 +17,9 @@ def pair_device(address):
     try:
         print(f"Pairing with device: {address}")
         process = subprocess.Popen(['bluetoothctl'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        process.communicate(input=f'pair {address}\n'.encode())
-        process.communicate(input='yes\n'.encode())
-        process.communicate(input=f'trust {address}\n'.encode())
+        # process.communicate(input=f'pair {address}\n'.encode())
+        # process.communicate(input='yes\n'.encode())
+        # process.communicate(input=f'trust {address}\n'.encode())
         process.communicate(input=f'connect {address}\n'.encode())
         print(f"Paired with device: {address}")
     except Exception as e:
@@ -44,17 +44,20 @@ def handle_device_connection(address):
 
 def main():
     devices = discover_devices()
+    addresses = ["28:52:E0:AC:CA:E9", "6C:47:60:A8:37:76"]
     
     # Pair with each discovered device
     for address, name in devices:
-        pair_device(address)
+        if address in addresses:
+            pair_device(address)
     
     # Connect to each paired device in a separate thread
     threads = []
     for address, name in devices:
-        thread = threading.Thread(target=handle_device_connection, args=(address,))
-        threads.append(thread)
-        thread.start()
+        if address in addresses:
+            thread = threading.Thread(target=handle_device_connection, args=(address,))
+            threads.append(thread)
+            thread.start()
     
     # Wait for all threads to complete
     for thread in threads:
